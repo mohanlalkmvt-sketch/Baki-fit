@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>OGRE OGN: EVOLUTION GRID</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght=700;900&family=Rajdhani:wght=600;700&display=swap');
+
+        :root {
+            --android-bg: #030305;
+            --bg-crimson-glare: radial-gradient(circle at top, #1a0005 0%, #030305 100%);
+            --bg-matrix-scan: linear-gradient(rgba(18, 0, 4, 0.9) 50%, rgba(3, 3, 5, 0.98) 50%), linear-gradient(90deg, rgba(255, 0, 60, 0.03) 1px, transparent 1px);
+            --glass-panel: rgba(12, 12, 16, 0.95);
+            --glass-border: rgba(255, 0, 60, 0.15);
+            --neon-crimson: #ff003c;
+            --neon-gold: #ffaa00;
+            --text-main: #ffffff;
+            --text-dim: #707e94;
+            --cyber-font: 'Orbitron', sans-serif;
+            --main-font: 'Rajdhani', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--main-font); }
+
+        body {
+            background: var(--android-bg);
+            color: var(--text-main);
+            overflow-x: hidden;
+            padding-bottom: 100px;
+            -webkit-tap-highlight-color: transparent;
+            transition: background 0.5s ease;
+        }
+
+        body.bg-glare { background: var(--bg-crimson-glare); }
+        body.bg-scan { background: var(--bg-matrix-scan); background-size: 100% 4px, 4px 100%; }
+
+        .app-container { max-width: 480px; margin: 0 auto; padding: 10px 14px; }
+
+        .registration-overlay {
+            position: fixed; inset: 0; background: var(--android-bg);
+            display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px; z-index: 10000;
+        }
+        .ogre-logo { font-family: var(--cyber-font); font-size: 2.8rem; font-weight: 900; color: var(--neon-crimson); text-shadow: 0 0 20px rgba(255, 0, 60, 0.6); }
+        .node-subtitle { color: var(--text-dim); font-size: 0.8rem; letter-spacing: 3px; margin-bottom: 30px; text-transform: uppercase; font-family: var(--cyber-font); }
+
+        .nav-tabs {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px;
+            background: #000000; border-top: 2px solid var(--neon-crimson); padding: 12px 10px env(safe-area-inset-bottom) 10px;
+            display: flex; gap: 4px; z-index: 999; border-radius: 16px 16px 0 0;
+        }
+        .tab-btn {
+            background: transparent; border: none; color: var(--text-dim); flex: 1; padding: 8px;
+            display: flex; flex-direction: column; align-items: center; gap: 4px; border-radius: 10px; cursor: pointer; transition: all 0.2s ease;
+        }
+        .tab-btn i { font-size: 1.1rem; }
+        .tab-btn span { font-size: 0.65rem; font-family: var(--cyber-font); font-weight: bold; }
+        .tab-btn.active { background: var(--neon-crimson); color: #fff; box-shadow: 0 0 15px rgba(255, 0, 60, 0.5); }
+        .tab-locked { opacity: 0.2; pointer-events: none; }
+
+        .metric-card {
+            background: var(--glass-panel); border: 1px solid var(--glass-border); border-radius: 16px;
+            padding: 18px; margin-bottom: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+        }
+
+        .input-group { margin-bottom: 14px; }
+        .input-label { display: block; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 6px; font-weight: 700; letter-spacing: 0.5px; }
+        .input-wrapper { position: relative; display: flex; align-items: center; }
+        .input-icon { position: absolute; left: 14px; color: var(--neon-crimson); }
+
+        input {
+            background: #000000; border: 1px solid #222; color: #fff; padding: 14px 14px 14px 40px;
+            border-radius: 10px; width: 100%; font-family: var(--cyber-font); font-size: 0.9rem;
+        }
+        input:not([id="reg-name"]) { padding-left: 16px; }
+        input:focus { border-color: var(--neon-crimson); outline: none; }
+
+        .btn-prime {
+            background: linear-gradient(90deg, var(--neon-crimson), #b30027); color: #fff; border: none; padding: 15px;
+            border-radius: 10px; width: 100%; font-family: var(--cyber-font); font-weight: 900; font-size: 0.9rem; cursor: pointer;
+        }
+
+        .workout-levels-grid, .filter-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 14px; }
+        .filter-container { grid-template-columns: 1fr 1fr; }
+        .chip-btn {
+            padding: 10px 4px; background: #000000; border: 1px solid #222; border-radius: 8px;
+            color: var(--text-dim); font-family: var(--cyber-font); font-size: 0.65rem; font-weight: bold; cursor: pointer;
+        }
+        .chip-btn.active { background: rgba(255, 0, 60, 0.15); border-color: var(--neon-crimson); color: #fff; }
+
+        .exercise-item { display: flex; align-items: center; gap: 14px; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .exercise-icon { width: 36px; height: 36px; background: rgba(255,0,60,0.08); border: 1px solid rgba(255,0,60,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--neon-crimson); }
+        .ex-text b { font-size: 1.05rem; color: #fff; display: block; text-transform: uppercase; }
+        .ex-text span { font-size: 0.85rem; color: var(--text-dim); font-weight: 600; }
+
+        .app-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 2px; }
+        .header-meta h1 { font-family: var(--cyber-font); font-size: 1.4rem; color: #fff; }
+        .header-meta p { font-size: 0.8rem; color: var(--neon-crimson); font-family: var(--cyber-font); font-weight: 700; }
+        .control-trigger { width: 38px; height: 38px; border-radius: 10px; background: #000; border: 1px solid #222; display: flex; align-items: center; justify-content: center; color: var(--neon-crimson); }
+
+        .settings-box { display: none; background: #000; border: 1px solid var(--glass-border); border-radius: 10px; padding: 4px; margin-bottom: 12px; }
+        .settings-box.show { display: block; }
+        .opt-item { display: flex; align-items: center; gap: 10px; padding: 12px; color: #fff; font-size: 0.85rem; font-family: var(--cyber-font); cursor: pointer; }
+
+        .badge-row { display: flex; gap: 8px; margin-bottom: 14px; }
+        .mini-badge { flex: 1; background: #000; border: 1px solid #222; padding: 10px; border-radius: 12px; display: flex; align-items: center; gap: 8px; }
+        .mini-badge i { color: var(--neon-gold); }
+        .badge-meta span { font-size: 0.65rem; color: var(--text-dim); display: block; font-family: var(--cyber-font); }
+        .badge-meta b { font-size: 1rem; font-family: var(--cyber-font); color: #fff; }
+        .xp-track-bg { width: 70px; height: 5px; background: #111; border-radius: 3px; margin-top: 4px; overflow: hidden; }
+        .xp-track-fill { width: 0%; height: 100%; background: var(--neon-crimson); }
+
+        .scan-matrix { text-align: center; padding: 30px 10px; }
+        .scan-loading-text { font-family: var(--cyber-font); font-size: 0.8rem; color: var(--neon-crimson); }
+        .bar-loader { background: #111; height: 4px; border-radius: 2px; overflow: hidden; margin-top: 14px; }
+        .bar-progress { height: 100%; width: 0%; background: var(--neon-crimson); transition: width 2s linear; }
+
+        .bmi-analytics-grid { display: flex; align-items: center; gap: 16px; }
+        .svg-container { position: relative; width: 100px; height: 100px; flex-shrink: 0; }
+        .svg-container svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+        .circle-bg { fill: none; stroke: #111; stroke-width: 8; }
+        .circle-prime { fill: none; stroke: var(--neon-crimson); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 339.29; stroke-dashoffset: 339.29; transition: stroke-dashoffset 0.8s ease; }
+        .bmi-absolute-value { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--cyber-font); font-size: 1.3rem; font-weight: 900; }
+        .char-type-title { font-size: 0.75rem; color: var(--text-dim); font-family: var(--cyber-font); }
+        .char-display-name { font-family: var(--cyber-font); font-size: 0.95rem; margin-top: 4px; font-weight: 900; color: var(--neon-crimson); }
+        .safety-badge { margin-top: 6px; font-size: 0.7rem; font-weight: bold; border: 1px solid var(--neon-gold); display: inline-block; padding: 2px 6px; border-radius: 4px; color: var(--neon-gold); font-family: var(--cyber-font); }
+
+        .ai-glow-panel { border-left: 4px solid var(--neon-crimson) !important; background: linear-gradient(135deg, rgba(255,0,60,0.03), transparent); }
+        .ai-advice-para { font-size: 0.9rem; line-height: 1.5; color: #e2e8f0; font-weight: 600; }
+
+        .tool-title { font-family: var(--cyber-font); font-size: 0.9rem; font-weight: bold; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .macro-grid-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .macro-pill { background: #000; padding: 12px; border-radius: 10px; border: 1px solid #1c1c24; text-align: center; }
+        .macro-pill span { display: block; font-size: 0.7rem; color: var(--text-dim); font-family: var(--cyber-font); }
+        .macro-pill b { font-family: var(--cyber-font); font-size: 1.1rem; color: var(--neon-crimson); }
+
+        .water-progress-container { background: #000; border: 1px solid #111; height: 36px; border-radius: 10px; position: relative; overflow: hidden; margin-top: 8px; }
+        .water-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #005588, #00d2ff); transition: width 0.3s ease; }
+        .water-text-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--cyber-font); font-size: 0.85rem; font-weight: bold; color: #fff; text-shadow: 0 1px 4px #000; }
+
+        .timer-display { font-family: var(--cyber-font); font-size: 2.2rem; font-weight: 900; color: #fff; text-align: center; margin: 10px 0; text-shadow: 0 0 10px rgba(255,255,255,0.1); }
+        .timer-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+        .page { display: none; }
+        .page.active { display: block; }
+    </style>
+</head>
+<body>
+<div class="app-container">
+
+    <!-- REGISTRATION BLOCK -->
+    <div id="register-screen" class="registration-overlay">
+        <div class="ogre-logo">OGRE.ai</div>
+        <div class="node-subtitle">Crimson Active Node</div>
+        <div class="metric-card" style="width: 100%;">
+            <div class="input-group">
+                <label class="input-label">FIGHTER CODENAME</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-user-ninja input-icon"></i>
+                    <input type="text" id="reg-name" placeholder="ENTER YOUR CODENAME..." autocomplete="off">
+                </div>
+            </div>
+            <button class="btn-prime" onclick="submitRegistration()">INITIALIZE SYNC</button>
+        </div>
+    </div>
+
+    <!-- MAIN APP INTERFACE -->
+    <div id="main-app" style="display: none;">
+        <header class="app-header">
+            <div class="header-meta">
+                <h1 id="user-display-name">FIGHTER</h1>
+                <p id="fighter-rank-title">EVOLVING PROTOCOL</p>
+            </div>
+            <div class="control-trigger" onclick="toggleSettings()">
+                <i class="fa-solid fa-sliders"></i>
+            </div>
+        </header>
+
+        <div id="settings-box" class="settings-box">
+            <div class="opt-item" onclick="editProfile()"><i class="fa-solid fa-user-gear"></i> EDIT CODENAME</div>
+        </div>
+        
+        <!-- COUNTERS GRID -->
+        <div class="badge-row">
+            <div class="mini-badge" id="streak-trigger-btn" onclick="triggerDailyCheckIn()">
+                <i class="fa-solid fa-fire"></i>
+                <div class="badge-meta">
+                    <span>STREAK</span>
+                    <b id="streak-count-display">0</b>
+                </div>
+            </div>
+            <div class="mini-badge">
+                <i class="fa-solid fa-dna"></i>
+                <div class="badge-meta">
+                    <span id="rank-xp-display">XP: 0/100</span>
+                    <div class="xp-track-bg"><div id="xp-progress-bar" class="xp-track-fill"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- APP CONTENT VIEWPORT -->
+        <div class="main-content-scroll-area">
+            
+            <!-- BIOMETRICS SCREEN (PAGE 1) -->
+            <div id="biometrics" class="page active">
+                <div class="metric-card">
+                    <div class="input-group">
+                        <label class="input-label">AGE (YEARS)</label>
+                        <input type="number" id="age" placeholder="e.g., 21">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">MASS (KG)</label>
+                        <input type="number" id="weight" placeholder="e.g., 70" step="0.1">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">HEIGHT (CM)</label>
+                        <input type="number" id="height" placeholder="e.g., 175">
+                    </div>
+                    <button class="btn-prime" onclick="startScan()">INJECT BIOMETRICS</button>
+                </div>
+
+                <!-- LOADING LAYER -->
+                <div id="loading-area" class="metric-card scan-matrix" style="display: none;">
+                    <div class="scan-loading-text">🧬 SYNCHRONIZING MUSCLE MASS NETWORK...</div>
+                    <div class="bar-loader"><div class="bar-progress"></div></div>
+                </div>
+
+                <!-- OUTPUT RESULTS -->
+                <div id="result-area" style="display: none;">
+                    <div class="metric-card">
+                        <div class="bmi-analytics-grid">
+                            <div class="svg-container">
+                                <svg><circle class="circle-bg" cx="60" cy="60" r="54"></circle><circle id="progress-circle" class="circle-prime" cx="60" cy="60" r="54"></circle></svg>
+                                <div id="bmi-out" class="bmi-absolute-value">0.0</div>
+                            </div>
+                            <div>
+                                <div class="char-type-title">CURRENT EVOLUTION MATRIX</div>
+                                <div id="char-name" class="char-display-name">LOADING PROFILE...</div>
+                                <div id="age-warning" class="safety-badge"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI INTELLIGENCE GRID -->
+                    <div class="metric-card ai-glow-panel">
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; color:var(--neon-crimson); font-weight:bold;">
+                            <i class="fa-solid fa-brain"></i> BAKI AI INSIGHT
+                        </div>
+                        <p id="ai-dynamic-advice" class="ai-advice-para"></p>
+                        <button class="btn-prime" onclick="runShadowShowdown()" style="margin-top:14px; background:linear-gradient(90deg, #110003, #44000a); border:1px solid var(--neon-crimson);">
+                            <i class="fa-solid fa-hand-fist"></i> ENTER SHADOW SHOWDOWN
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WORKOUTS SELECTION VIEW (PAGE 2) -->
+            <div id="workouts" class="page">
+                <div class="workout-levels-grid">
+                    <button id="lvl-skeleton" class="chip-btn active" onclick="selectWorkoutLevel('skeleton')">💀 SKELETON</button>
+                    <button id="lvl-jack" class="chip-btn" onclick="selectWorkoutLevel('jack')">💪 JACK</button>
+                    <button id="lvl-demon" class="chip-btn" onclick="selectWorkoutLevel('demon')">👹 DEMON</button>
+                    <button id="lvl-ogre" class="chip-btn" onclick="selectWorkoutLevel('ogre')">🧌 OGRE</button>
+                </div>
+                <div id="daily-workout-content"></div>
+            </div>
+
+            <!-- NUTRIENTS ARCHITECTURE (PAGE 3) -->
+            <div id="diet" class="page">
+                <div class="filter-container">
+                    <button id="toggle-veg" class="chip-btn active" onclick="setDietType('veg')"><i class="fa-solid fa-seedling"></i> VEG</button>
+                    <button id="toggle-nonveg" class="chip-btn" onclick="setDietType('nonveg')"><i class="fa-solid fa-drumstick-bite"></i> MEAT</button>
+                </div>
+                <div id="daily-diet-content"></div>
+            </div>
+
+            <!-- NEW UTILITIES & BASIC TOOLS SECTION (PAGE 4) -->
+            <div id="tools" class="page">
+                <div class="metric-card diagnostic-box">
+                    <div class="tool-title"><i class="fa-solid fa-calculator"></i> TARGET MACROS</div>
+                    <div class="macro-grid-panel">
+                        <div class="macro-pill"><span>CALORIES</span><b id="target-calories-val">0 kcal</b></div>
+                        <div class="macro-pill"><span>PROTEIN</span><b id="target-protein-val">0 g</b></div>
+                    </div>
+                </div>
+
+                <div class="metric-card diagnostic-box">
+                    <div class="tool-title"><i class="fa-solid fa-droplet" style="color: #00d2ff;"></i> HYDRATION PROTOCOL</div>
+                    <div class="water-progress-container">
+                        <div id="water-bar" class="water-progress-fill"></div>
+                        <div class="water-text-overlay"><span id="water-count-val">0.0</span> / 4.0 LITERS</div>
+                    </div>
+                    <button class="btn-prime" onclick="addWaterLog()" style="background: linear-gradient(90deg, #001133, #005588); border: 1px solid #00d2ff; margin-top: 10px;">
+                        <i class="fa-solid fa-glass-water"></i> CONSUME 1 GLASS (250ML)
+                    </button>
+                </div>
+
+                <div class="metric-card diagnostic-box">
+                    <div class="tool-title"><i class="fa-solid fa-stopwatch"></i> COOLDOWN INTERVAL CLOCK</div>
+                    <div class="timer-display" id="timer-clock-out">45s</div>
+                    <div class="timer-controls">
+                        <button class="chip-btn" onclick="controlTimer('start')">START BREAK</button>
+                        <button class="chip-btn" onclick="controlTimer('reset')">RESET</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- FIXED NAVIGATION INTERACTION -->
+        <nav class="nav-tabs">
+            <button id="btn-bio" class="tab-btn active" onclick="switchPage('biometrics')"><i class="fa-solid fa-chart-simple"></i><span>BIO</span></button>
+            <button id="btn-work" class="tab-btn tab-locked" onclick="switchPage('workouts')"><i class="fa-solid fa-dumbbell"></i><span>DRILLS</span></button>
+            <button id="btn-diet" class="tab-btn tab-locked" onclick="switchPage('diet')"><i class="fa-solid fa-plate-wheat"></i><span>DIET</span></button>
+            <button id="btn-too" class="tab-btn tab-locked" onclick="switchPage('tools')"><i class="fa-solid fa-toolbox"></i><span>TOOLS</span></button>
+        </nav>
+    </div>
+</div>
+
+<script>
+    let currentXP = 0;
+    let currentStreak = 0;
+    let selectedWorkoutLevel = "skeleton";
+    let selectedDi
